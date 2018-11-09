@@ -4,11 +4,16 @@
 #include <time.h>
 #include <unistd.h>
 
-#define FALL_1 1000000
-#define FALL_2 800000
-#define FALL_3 600000
-#define FALL_4 500000
-#define FALL_5 400000
+#define FALL_1 800000
+#define FALL_2 600000
+#define FALL_3 400000
+#define FALL_4 300000
+#define FALL_5 200000
+#define DONE_1 10
+#define DONE_2 15
+#define DONE_3 20
+#define DONE_4 25
+#define DONE_5 30
 void draw();
 void move_zombie(int fall_speed);
 
@@ -18,8 +23,8 @@ void main(){
 
 	initscr();
 	draw();
-	for(i=0;i<10;i++){
-		move_zombie(FALL_3);
+	for(i=0; i<DONE_5; i++){
+		move_zombie(FALL_5);
 	}
 	getch();
 	endwin();
@@ -60,9 +65,13 @@ void move_zombie(int fall_speed){
 				move(i,6);
 				addstr("   zz   ");
 				refresh();
+				/*if((i==24)&&){
+
+				}*/
 				usleep(fall_speed);
 				move(i,6);
 				addstr("        ");
+
 			}
 			break;
 		case 1:
