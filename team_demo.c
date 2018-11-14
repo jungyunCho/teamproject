@@ -35,7 +35,7 @@ void draw(){
 
 	 clear();
 	 move(1,4);
-	 addstr("press each button below on right timming");
+	 addstr("press each button below");
 
 	 for(i=5;i<25;i++){
 		 move(i,5);
