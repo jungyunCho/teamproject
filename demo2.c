@@ -6,7 +6,7 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <termios.h>
-#include <curses.h>
+#include <ncurses.h>
 #include <fcntl.h>
 
 void draw();
@@ -19,12 +19,13 @@ void main(){
 	int count,i;
 	char cnt[100];
 
-	//tty_mode(0);
-	set_cr_noecho_mode();
-//	noecho();
-//	cbreak();
-	set_nodelay();
 	initscr();
+	//tty_mode(0);
+//	set_cr_noecho_mode();
+	noecho();
+	cbreak();
+	nodelay(stdscr,TRUE);
+	//set_nodelay();
 
 	while((c=getch())!='q'){
 		move(i,5);
@@ -41,19 +42,14 @@ void main(){
 	addstr(cnt);
 	refresh();
 	sleep(5);
-
 	tty_mode(1);
 	endwin();
 }
-
-
 void draw(){
 	int i;
-	
 	clear();
 	move(1,4);
 	addstr("Press each button below");
-
 	for(i=5;i<25;i++){
 		move(i,5);
 		addstr("|        |        |        |        |");
@@ -68,7 +64,6 @@ void draw(){
 	addstr("FF");
 	refresh();
 }
-
 void set_cr_noecho_mode(){
 	struct termios ttystate;
 	tcgetattr(0, &ttystate);
@@ -78,7 +73,7 @@ void set_cr_noecho_mode(){
 	tcsetattr(0,TCSANOW, &ttystate);
 }
 void set_nodelay(){
-	int termflags;
+	int  termflags;
 	termflags = fcntl(0,F_GETFL);
 	termflags |= O_NDELAY;
 	fcntl(0,F_SETFL, termflags);
