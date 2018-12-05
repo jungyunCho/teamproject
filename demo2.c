@@ -10,9 +10,6 @@
 #include <fcntl.h>
 
 void draw();
-void set_cr_noecho_mode();
-void set_nodelay();
-int tty_mode();
 
 void main(){
 	char c;
@@ -63,30 +60,4 @@ void draw(){
 	move(25,36);
 	addstr("FF");
 	refresh();
-}
-void set_cr_noecho_mode(){
-	struct termios ttystate;
-	tcgetattr(0, &ttystate);
-	ttystate.c_lflag &= ~ICANON;
-	ttystate.c_lflag &= ~ECHO;
-	ttystate.c_cc[VMIN] =1;
-	tcsetattr(0,TCSANOW, &ttystate);
-}
-void set_nodelay(){
-	int  termflags;
-	termflags = fcntl(0,F_GETFL);
-	termflags |= O_NDELAY;
-	fcntl(0,F_SETFL, termflags);
-}
-int tty_mode(int how){
-	static struct termios og_mode;
-	static int og_flags;
-	if(how == 0){
-		tcgetattr(0, &og_mode);
-		og_flags = fcntl(0, F_GETFL);
-	}
-	else{
-		tcsetattr(0, TCSANOW, &og_mode);
-		fcntl(0,F_SETFL,og_flags);
-	}
 }
