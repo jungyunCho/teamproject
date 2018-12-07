@@ -17,11 +17,10 @@ int speed = 500;		/*	게임 스피드		*/
 int timelimit;			/*	스테이지 제한 시간		*/
 char zombie[2] = "zz";		/*	좀비 모습	*/
 int zDelay = 10000;			/*	좀비 생성 쿨타임	*/
-char zombie_pos[4][25];
+int zombie_pos[4][25];
 
 int set_ticker(struct itimerval, int);	/*	set timer	*/
 int playGame(void);		/*	게임시작	*/
-//int getkey(void);		/*	대기없이 문자를 바로 입력	*/
 void game_handler(int);
 void draw(void);		/*	배경 그리기	*/
 void new_zombie(void);	/* 	zDelay시간마다 좀비 이동시키기		*/
@@ -35,24 +34,32 @@ int main(void)
 	int i, j;
 	for(i=0;i<4;i++)
 		for(j=0;j<25;j++)
-			zombie_pos[i][j] = 0;
+			zombie_pos[i][j] = 0;		// initialize zombie_pos
 	initscr();			/*	turn on curses	*/
 	clear();
 
 	while(menu)
 	{
+		
+		echo();
+		nocbreak();
+		nodelay(stdscr, FALSE);
+		
 		menu = display_menu();	/*	메뉴그리고 입력받기	*/
 		if(menu == 1)
 		{
+			noecho();
+			cbreak();
+			nodelay(stdscr, TRUE);
 			game = playGame();
-		}
+		}/*
 		else if(menu == 2)
 		{
 			show_score();
-		}
+		}*/
 		else if(menu == 3)
 		{
-			exit(0);
+			break;
 		}
 	}
 
@@ -68,26 +75,28 @@ int display_menu(void)
 
 	while(1)
 	{
+		i = 0;
 		clear();
 		move(i++, 0);
-		addstr("1호선");
+		addstr("Welcome to the 1st line");
 		move(i++, 0);
 		addstr("============================");
 		move(i++, 0);
-		addstr("게 임 메 뉴");
+		addstr("Menu");
 		move(i++, 0);
 		addstr("============================");
 		move(i++, 0);
-		addstr("1) 게임 시작\t   =");
+		addstr("1) Start New Game\t   =");
 		move(i++, 0);
-		addstr("2) 점수 보기\t   =");
+		addstr("2) Score\t   =");
 		move(i++, 0);
-		addstr("3) 게임 종료\t   =");
+		addstr("3) Quit\t   =");
 		move(i++, 0);
 		addstr("============================");
 		move(i++, 0);
-		addstr("선택 : ");
-		scanf("%d",&menu);
+		addstr("Choose : ");
+		refresh();
+		scanw("%d",&menu);
 		if(menu < 1 || menu > 3)
 		{
 			continue;
@@ -97,7 +106,7 @@ int display_menu(void)
 			return menu;		/* 입력받은 선택지 반환	*/
 		}
 	}
-	return 0;
+	//return 0;
 }
 
 int playGame(void)
@@ -126,40 +135,7 @@ int playGame(void)
 
 	return 0;
 }
-/*
-int getkey(void)
-{
-	char ch;
-	int error;
-	static struct termios Otty, Ntty;
 
-	fflush(stdout);
-	tcgetattr(0, &Otty);
-	Ntty = Otty;
-	Ntty.c_iflag = 0;
-	Ntty.c_oflag = 0;
-	Ntty.c_lflag &= ~ICANON;
-#if 1
-	Ntty.c_lflag &= ~ECHO;
-#else
-	Ntty.c_lflag |= ECHO;
-#endif
-	Ntty.c_cc[VMIN] = CCHAR;
-	Ntty.c_cc[VTIME] = CTIME;
-#if 1
-#define FLAG TCSAFLUSH
-#else
-#define FLAG TCSANOW
-#endif
-	if(0 == (error = tcsetattr(0, FLAG, &Ntty)))
-	{
-		error = read(0, &ch, 1);
-		error += tcsetattr(0, FLAG, &Otty);
-	}
-
-	return (error == 1 ? (int) ch : -1);
-}
-*/
 int set_ticker(struct itimerval timeset, int n_msecs)
 {
 	long n_sec, n_usecs;
@@ -188,6 +164,7 @@ void game_handler(int signum)	/*	게임이 시작되면 0.1초마다 호출되�
 	{
 		case 65	:
 		case 97	:			/*	when you stroke 'a'	*/
+			move(0,0);
 			addstr("*HIT*");
 			break;
 		case 27	:
@@ -221,28 +198,38 @@ void draw()
          refresh();
 }
 
-/*	좀비 랜덤 생성	*/
+/*	generate new zombie randomly at random lane	*/
 void new_zombie()
 {
-	int ran_pla;	// 랜덤으로 정해지는 생성 레인
-	int i;
+	int generate;
+	int ran_lane;	// random lane where zombies are generated
+	int i,j;
 
 	srand((unsigned)time(NULL));
-	ran_pla = rand()%4;
-	zombie_pos[ran_pla][0] = 1;		//	레인 첫번째 줄에 좀비 생성
+
+	for(i=4;i>0;i--)
+		for(j=24;j>0;j--)
+			if(zombie_pos[i][j] == 1)		//	zombies move 1 step
+			{
+				zombie_pos[i][j] = 0;
+				zombie_pos[i][j+1] = 1;
+			}
+	generate = rand()%2;			// the chance that zombie will generate
+	ran_lane = rand()%4;
+	if(generate == 0)
+		zombie_pos[ran_lane][0] = 1;		//	generate new zombie at random lane
 }
 
-
-
-void draw_zomebie()
+void draw_zombie()
 {
-	int x;		// 레인 번호
+	int x;
 	int y;
+	
 	for(x=0;x<4;x++)
 		for(y=0;y<25;y++)
 			if(zombie_pos[x][y] == 1)
 			{
-				move(x*9-5, y);
+				move(y, (x+1)*9);
 				addstr(zombie);
 			}
 }
