@@ -64,7 +64,7 @@ int main(void)
 			addstr("33333");
 			refresh();
 			sleep(2);
-			exit(0);
+			break;
 		}
 	}
 
