@@ -142,10 +142,9 @@ int playGame(void)
 	while(1)
 	{
 		
-		if(life < 0)	/* 게임 종료	*/
+		if(game == 1)	/* 게임 종료	*/
 		{
-			game = 1;
-			life = 10;
+			life = 5;
 			set_ticker(new_timeset, 0);
 			move(30,0);
 			addstr("Game Over!");
@@ -213,6 +212,8 @@ void game_handler(int signum)	/*	게임이 시작되면 0.1초마다 호출되�
                         life--;
                 }
         }
+	if(life < 1)
+		game = 1;
 
 	move(0,0);
 	printw("Remain Life : %2d  |  Score : %lf", life, re_time);
@@ -357,8 +358,8 @@ void draw()
          int i;
 
          clear();
-         move(1,4);
-         addstr("press each button below");
+         move(2,4);
+         addstr("Press each button below (ESC : Quit)");
 
          for(i=0;i<17;i++){
                  move(i+5,5);
